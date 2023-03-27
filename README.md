@@ -1,4 +1,4 @@
-# front2
+# Generador de encuestas 
 
 ## Project setup
 ```

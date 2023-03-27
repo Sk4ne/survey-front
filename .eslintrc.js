@@ -1,5 +1,6 @@
 module.exports = {
-  root: true,
+  // root: true,
+  root: false,
   env: {
     node: true
   },
@@ -12,6 +13,8 @@ module.exports = {
   },
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    /* ERROR LINTER */
+    "vue/multi-word-component-names": "off"
   }
 }
