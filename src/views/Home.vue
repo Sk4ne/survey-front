@@ -35,20 +35,24 @@
             <!-- INPUT RADIO -->
             <div v-if="model.typeQuestion === typeQuestionEnums.QUESTION_MULTIPLE">
               <div class="mt-2 form-check" >
-                <input type="radio" class="input-check-radio" disabled>
-                <label class="mx-2 form-check-label" for="exampleRadios1"> SI</label>
+                <!-- <input type="radio" class="input-check-radio" disabled v-model="model.answerM.options">
+                <label class="mx-2 form-check-label" for="exampleRadios1"> {{ typeOptionEnums.optionSi }}</label> -->
+                <input type="radio" class="input-check-radio" :value="typeOptionEnums.optionSi" v-model="model.answerM.answer">
+                <label class="mx-2 form-check-label" for="exampleRadios1"> {{ typeOptionEnums.optionSi }}</label>
               </div>
               <div class="mt-2 form-check">
-                <input type="radio" class="input-check-radio" disabled>
-                <label class="mx-2 form-check-label" for="exampleRadios1"> NO</label>
+                <!-- <input type="radio" class="input-check-radio" disabled v-model="typeOptionEnums.optionNo"> -->
+                <input type="radio" class="input-check-radio" :value="typeOptionEnums.optionNo" v-model="model.answerM.answer">
+                <label class="mx-2 form-check-label" for="exampleRadios1"> {{ typeOptionEnums.optionNo }}</label>
               </div>
               <div class="mt-2 form-check">
-                <input type="radio" class="input-check-radio" disabled>
-                <label class="mx-2 form-check-label" for="exampleRadios1"> UN POCO</label>
+                <!-- <input type="radio" class="input-check-radio" disabled v-model="typeOptionEnums.optionUnPoco"> -->
+                <input type="radio" class="input-check-radio" :value="typeOptionEnums.optionUnPoco" v-model="model.answerM.answer">
+                <label class="mx-2 form-check-label" for="exampleRadios1"> {{ typeOptionEnums.optionUnPoco }}</label>
               </div>
             </div>
             <!-- </INPUT RADIO -->
-
+            <!-- ======= NUEVA PREGUNTA ========= -->
             <!-- NUEVA PREGUNTA -->
             <div class='mt-4' v-if="newQuestions.length > 0">
               <!-- SE CREA CUANDO PRESIONO EL boton +  -->
@@ -60,9 +64,6 @@
                   </div>
                   <div class="col">
                     <select name="" id="" class="form-control" v-model="question.typeQuestion">
-                      <!-- <option value="CHOOSE">Choose...</option>
-                      <option value="QUESTION_OPEN">QUESTION_OPEN</option>
-                      <option value="QUESTION_MULTIPLE">QUESTION_MULTIPLE</option> -->
                       <option :value="typeQuestionEnums.CHOOSE">Choose...</option>
                       <option :value="typeQuestionEnums.QUESTION_OPEN">QUESTION_OPEN</option>
                       <option :value="typeQuestionEnums.QUESTION_MULTIPLE">QUESTION_MULTIPLE</option>
@@ -83,16 +84,19 @@
                 <!-- INPUT RADIO -->
                 <div v-if="question.typeQuestion === typeQuestionEnums.QUESTION_MULTIPLE" >
                   <div class="mt-2 form-check">
-                    <input type="radio" class="input-check-radio" disabled>
-                    <label class="mx-2 form-check-label" for="exampleRadios1"> SI</label>
+                    <!-- <input type="radio" class="input-check-radio" disabled v-model="typeOptionEnums.optionSi">
+                    <label class="mx-2 form-check-label" for="exampleRadios1"> {{ typeOptionEnums.optionSi }}</label> -->
+                    <!-- <input type="radio" class="input-check-radio" :value='typeOptionEnums.optionSi' v-model="model.answerM.options"> -->
+                    <input type="radio" class="input-check-radio" :value='typeOptionEnums.optionSi' v-model="model.answerM.answer">
+                    <label class="mx-2 form-check-label" for="exampleRadios1"> {{ typeOptionEnums.optionSi }}</label>
                   </div>
                   <div class="mt-2 form-check">
-                    <input type="radio" class="input-check-radio" disabled>
-                    <label class="mx-2 form-check-label" for="exampleRadios1"> NO</label>
+                    <input type="radio" class="input-check-radio" :value='typeOptionEnums.optionNo' v-model="model.answerM.answer">
+                    <label class="mx-2 form-check-label" for="exampleRadios1"> {{ typeOptionEnums.optionNo }}</label>
                   </div>
                   <div class="mt-2 form-check">
-                    <input type="radio" class="input-check-radio" disabled>
-                    <label class="mx-2 form-check-label" for="exampleRadios1"> UN POCO</label>
+                    <input type="radio" class="input-check-radio" :value='typeOptionEnums.optionUnPoco' v-model="model.answerM.answer">
+                    <label class="mx-2 form-check-label" for="exampleRadios1"> {{ typeOptionEnums.optionUnPoco }}</label>
                   </div>
                 </div>
                 <!-- </INPUT RADIO -->
@@ -105,6 +109,7 @@
              
             </div>
             <!-- </NUEVA PREGUNTA -->
+           <!-- =========== </NUEVA PREGUNTA> ============= -->
 
             <!-- ALL ERRORS -->
             <div v-show="messageError===true" class="mt-4 p-4 bg-danger text-white">
@@ -125,11 +130,11 @@
         </div>
         <div class="col-md-2">
           <!-- BOTON CREAR NUEVA DATA -->
-          <button class="btn btn-outline-secondary" @click="saveNewQuestion()" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Agregar Pregunta!!" data-trigger="hover">
+          <!-- <button class="btn btn-outline-secondary" @click="saveNewQuestion()" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Agregar Pregunta!!" data-trigger="hover"> -->
+          <button class="btn btn-outline-secondary" @click="saveNewQuestion()" data-container="body" data-toggle="tooltip" data-placement="bottom" title="Tooltip on bottom">
             <i class="fa fa-plus-circle"></i>
             <!-- Agregar -->
           </button>
-         
         </div>
       </div>
     </div>
@@ -143,6 +148,7 @@ export default {
   components: {
 
   },
+  /* DATA ORIGINAL */
   created(){
     this.typeQuestionEnums.QUESTION_MULTIPLE = 'QUESTION_MULTIPLE';
     this.typeQuestionEnums.QUESTION_OPEN = 'QUESTION_OPEN';
@@ -157,7 +163,13 @@ export default {
         // QUESTION_OPEN: 'QUESTION_OPEN'
         QUESTION_MULTIPLE: null,
         QUESTION_OPEN: null, 
-        CHOOSE:null
+        CHOOSE:null,
+      },
+      /* PREGUNTAS MULTIPLES */
+      typeOptionEnums : {
+        optionSi: 'SI',
+        optionNo: 'NO',
+        optionUnPoco: 'UNPOCO' 
       },
       typeQuestion: '',
       questionAnswer: '',
@@ -168,7 +180,7 @@ export default {
         question: [
           {
             answerM: {
-              option: [],
+              options: [],
               answer: ''
             },
             titleQuestion: [],
@@ -180,13 +192,20 @@ export default {
       newQuestions: [],
       model: {
         answerM: {
-          option: [],
+          options: [],
           answer: ''
         },
         titleQuestion: [],
         // typeQuestion: [],
         typeQuestion: [],
         answerO: ''
+      },
+
+      /* PREGUNTA MULTIPLE  eliminar esto no hace nada....*/
+      answerMultiple: {
+          // SI,NO,UNPOCO
+          options: [],
+          answer:''
       }
     }
   },
@@ -197,11 +216,17 @@ export default {
     deleteElementDom(){
       this.newQuestions.pop()
     },
+    /* ESTE METODO SE LE ASIGNA AL BOTON + -> AGREGAR NUEVA PREGUNTA */
     saveNewQuestion() {
+      /* TEST */
+      // return;
+      /* eslint-disable */
+      /* TEST */
       this.newQuestions.push(this.model)
+      /* LIMPIAR EL MODELO */
       this.model = {
         answerM: {
-          option: [],
+          options: [],
           answer: ''
         },
         titleQuestion: [],
@@ -220,14 +245,21 @@ export default {
     },
     async saveSurvey() {
       try {
+        /* VALIDAR EL TIPO DE PREGUNTA A GUARDAR */
+        // const surveys = await this.axios.post('/survey', {  ORIGINAL
         const surveys = await this.axios.post('/survey', {
           ...this.survey,
+          /* ESTA LINEA NO HACE NADA HAY QUE ELIMINARLA */
+          answerM: this.answerMultiple,
+          /* ARREGLO DE PREGUNTAS */
           question: this.newQuestions
         })
         this.surveys.unshift(surveys.data);
         console.log('DATA SAVED')
-        console.log(surveys);
+        // console.log(this.surveys)
         this.$router.push({name: 'encuesta'})
+
+
         /* MENSAJE EXITO SWEETALERT 2 */
         Swal.fire({
           position: 'top-end',

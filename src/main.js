@@ -23,8 +23,12 @@ Vue.config.productionTip = false
 axios.defaults.baseURL = 'http://localhost:3000/v1';
 
 /* TOOTIP GLOBAL */
+// $(function () {
+//   $('[data-toggle="popover"]').popover()
+// })
+
 $(function () {
-  $('[data-toggle="popover"]').popover()
+  $('[data-toggle="tooltip"]').tooltip()
 })
 
 new Vue({
