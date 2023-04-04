@@ -17,7 +17,7 @@
                 <ul>
                   <div v-for="(question, key) of survey.question" :key="key">
                     <li class="mt-4 font-weight-bold">
-                      {{ question.titleQuestion }} - <span style="color:red">{{ question.typeQuestion }}</span>
+                      {{ question.titleQuestion }}
                     </li>
                     <hr>
                     <!-- TODO: Valido el tipo de pregunta y muestro la respuesta de las mismas -->
@@ -55,19 +55,25 @@
                     <div class="modal-body" v-if="typeQuestion === 'QUESTION_OPEN'">
                       <form @submit.prevent="updateAnswer()">
                         <div class="form-group">
-                          <p class="text-center font-weight-bold">{{ answerQuestion.titleQuestion }}</p>
-                          <textarea rows="5" class="form-control" v-model="answerQuestion.answerO"></textarea>
+                          <!-- <p class="text-center font-weight-bold">{{ answerQuestion.titleQuestion }}</p> -->
+                          <input type="text" class="form-control" v-model="answerQuestion.titleQuestion">
+                          <textarea rows="5" class="mt-2 form-control" v-model="answerQuestion.answerO"></textarea>
                         </div>
-                        <button type="submit" class="mx-2 btn btn-outline-secondary" @click="hideModal()">Guardar</button>
-                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="mx-2 btn btn-outline-secondary" @click="hideModal()">
+                          Guardar
+                          <i class="fa-regular fa-floppy-disk " ></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                          Cerrar
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
                       </form>
                     </div>
                     <!-- MUESTRO ESTE MODAL-BODY si la pregunta es QUESTION_MULTIPLE -->
                     <!-- !MUESTRO ESTE MODAL-BODY si la pregunta es QUESTION_MULTIPLE -->
                     <div class="modal-body" v-else>
-                      <p class="text-center font-weight-bold">{{ answerQuestion.titleQuestion }}</p>
-                      <div >
-                      </div>
+                      <!-- <p class="text-center font-weight-bold">{{ answerQuestion.titleQuestion }}</p> -->
+                      <input type="text" class="mb-2 form-control" v-model="answerQuestion.titleQuestion">
                       <form @submit.prevent="updateAnswer()">
                         <div class="form-check">
                           <input
@@ -89,8 +95,15 @@
                           <label class="form-check-label" for="ExampleRadio1"> UNPOCO</label>
                         </div>
                         <hr>
-                        <button type="submit" class="mx-2 btn btn-outline-secondary" @click="hideModal()">Guardar</button>
-                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="mx-2 btn btn-outline-secondary" @click="hideModal()">
+                          Guardar
+                          <i class="fa-regular fa-floppy-disk " ></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                          Cerrar
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                       
                       </form>
                     </div>
                     <!-- </MUESTRO ESTE MODAL-BODY si la pregunta es QUESTION_MULTIPLE -->
@@ -161,7 +174,7 @@ export default {
   data() {
     return {
       selected:'',
-      nameUnique:'',
+      // nameUnique:'',
       disableRadio: false,
       dateFormat: null,
       allSurveys: [],
@@ -193,8 +206,8 @@ export default {
       const survey = await this.axios.get('/surveys');
       this.allSurveys = survey.data;
       /* name unique */
-      this.nameUnique = Math.random().toString(36).substr(2, 18);
-      console.log(this.nameUnique)
+      // this.nameUnique = Math.random().toString(36).substr(2, 18);
+      // console.log(this.nameUnique)
       // console.log(this.allSurveys)
     },
     formatDate(date) {
@@ -222,7 +235,7 @@ export default {
         // await this.axios.put(`/survey/${this.surveySelectById}`,{data: this.surveyEdit})
         let data = await this.axios.put(`/survey/${survey._id}`, survey)
         this.getSurveys();
-        console.log(data)
+        // console.log(data)
       } catch (error) {
         console.log(error)
       }
@@ -269,7 +282,7 @@ export default {
             id: surveyID,
             idQuestion: questionID
           }
-          console.log(this.surveySelected);
+          // console.log(this.surveySelected);
         } else {
           this.answerQuestion = surveyQuestion;
           this.typeQuestion = this.answerQuestion.typeQuestion;
@@ -279,10 +292,9 @@ export default {
             idQuestion: questionID
           }
 
-          console.log('SOY ANSWERQUESTION');
-          /* TEST - MEJORAR ESTO */
+          /* Esta propiedad almaceno el value del input radio */
           this.rtaMultiple  = this.answerQuestion.answerM.answer
-          console.log(this.rtaMultiple);
+          /* y paso el valor a la propiedad selectOption con el fin de checkear por default el input radio con la respuesta  */
           this.selectedOption = this.rtaMultiple
         }
         
@@ -295,13 +307,14 @@ export default {
       try {
         /* VALIDO EL TIPO DE PREGUNTA */
         if (this.typeQuestion == 'QUESTION_OPEN') {
-          await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`, { answerOpen: this.answerQuestion.answerO });
+          await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`, { answerOpen: this.answerQuestion.answerO, titleQuestion: this.answerQuestion.titleQuestion});
           /* LLAMO EL METODO QUE ME RETORNA TODAS LAS ENCUESTAS - PARA ACTUALIZAR ESTA VISTA */
           this.getSurveys();
-          console.log(this.typeQuestion)
+          // console.log(this.typeQuestion)
+          // console.log(this.answerQuestion)
         } else {
           // alert('SOY UNA PREGUNTA MULTIPLE - AHORA TRABAJARE CONTIGO');
-          await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`,{answerMultiple: this.selectedOption})
+          await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`,{answerMultiple: this.selectedOption, titleQuestion: this.answerQuestion.titleQuestion})
           this.getSurveys();
         }
       } catch (error) {
