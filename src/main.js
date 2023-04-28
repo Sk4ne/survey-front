@@ -20,7 +20,11 @@ Vue.use(BootstrapVue)
 
 Vue.config.productionTip = false
 
+// Desarrollo
 axios.defaults.baseURL = 'http://localhost:3000/v1';
+
+// Produccion
+// axios.defaults.baseURL = 'https://survey-production.up.railway.app/v1';
 
 /* TOOTIP GLOBAL */
 // $(function () {

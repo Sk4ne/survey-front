@@ -8,7 +8,7 @@
           <!-- <div class="mb-4 mt-2 card" v-for="(survey,key) of allSurveys" :key="key"> ORIGINAL -->
           <div class="mb-4 mt-2 card" v-for="(survey, key) of allSurveys" :key="key">
             <div class="mt-4 card-body">
-              <h2 class="text-center">{{ survey.titleSurvey }}</h2>
+              <h2 class="text-center">{{ survey.titleSurvey }} </h2>
               <p class="text-warning">{{ formatDate(survey.createAt) }}</p>
 
               <p class="mt-4">{{ survey.description }}</p>
@@ -140,6 +140,36 @@
                 </div>
               </div>
               <!-- </MODAL EDIT SURVEY -->
+
+              <!-- !MODAL AGREGAR UNA PREGUNTA -->
+               <!-- Modal -->
+                <div class="modal fade" id="addNewQuestion" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Nueva Pregunta...</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form @submit.prevent=" addNewQuestion(question)">
+                          <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Titulo Pregunta" v-model="question[0].titleQuestion">
+                            <select class="mt-2 form-control" v-model="question[0].typeQuestion">
+                              <option value="" disabled >Choose..</option>
+                              <option value="QUESTION_OPEN">QUESTION_OPEN</option>
+                              <option value="QUESTION_MULTIPLE">QUESTION_MULTIPLE</option>
+                            </select>
+                          </div>
+                          <button type="submit" class="btn btn-outline-secondary" @click="hideModalNewQuestion">Guardar</button>
+                          <button type="button" class="mx-2 btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <!-- !</MODAL AGREGAR UNA PREGUNTA -->
               <!-- MENSAJE DE ERROR BACKEND -->
               <p class="text-center text-white bg-danger p-2" v-if="errorMessage">{{ errorMessage }}</p>
             </div>
@@ -155,9 +185,22 @@
                 <i class="fa-regular fa-pen-to-square"></i>
               </button>
               <!-- </EDITAR ENCUESTA> -->
+
+              <!--  !Agregar nueva pregunta a la encuesta existente -->
+              <button
+                class="btn btn-outline-secondary"
+                @click="idForNewQuestion(survey._id)"
+                data-toggle="modal" data-target="#addNewQuestion" >
+                <i class="fa fa-plus-circle"></i>
+              </button>
             </div>
           </div>
         </div>
+        <!-- * SECOND column -->
+        <!-- <div class="col-md">
+          <button class="mt-4 btn btn-outline-secondary">+</button>
+        </div> -->
+        <!-- * </SECOND column -->
       </div>
     </div>
   </div>
@@ -196,6 +239,20 @@ export default {
       rtaMultiple:'',
       /* SE LE ASIGNA EL VALOR QUE EL USUARIO SELECCIONA EN LAS PREGUNTAS MULTIPLES - SI,NO,UNPOCO */
       selectedOption: '',
+      /* DATA NEW QUESTION */
+      question:[
+        {
+          titleQuestion:'',
+          typeQuestion: '',
+          answerM: {
+            options: [],
+            answer:''
+          },
+          answerO: '',
+          // _id:''
+        }
+      ],
+      surveyById: {}
     }
   },
   created() {
@@ -205,10 +262,6 @@ export default {
     async getSurveys() {
       const survey = await this.axios.get('/surveys');
       this.allSurveys = survey.data;
-      /* name unique */
-      // this.nameUnique = Math.random().toString(36).substr(2, 18);
-      // console.log(this.nameUnique)
-      // console.log(this.allSurveys)
     },
     formatDate(date) {
       let fecha = dayjs(date).format('DD MMMM YYYY');
@@ -224,8 +277,6 @@ export default {
           titleSurvey: data.titleSurvey,
           description: data.description
         }
-        // console.log(this.surveySelectById)
-        // console.log(this.surveyEdit)
       } catch (error) {
         console.log(error)
       }
@@ -236,6 +287,31 @@ export default {
         let data = await this.axios.put(`/survey/${survey._id}`, survey)
         this.getSurveys();
         // console.log(data)
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    /* CREAR NUEVA PREGUNTA */
+    async idForNewQuestion(idSurvey){
+      try {
+        const { data }  = await this.axios.get(`/survey/${idSurvey}`);
+        this.surveyById = {
+          _id: data._id
+        }
+        console.log(idSurvey)
+      } catch (error) {
+        console.log(error.response.data.errors)
+      }
+    },
+    /* AGREGAR NUEVA PREGUNTA */
+    async addNewQuestion(survey){
+      try {
+        const newQuestion = await this.axios.put(`/push-question/${this.surveyById._id}`, {question: this.question});
+        console.log(newQuestion)
+        /* LIMPIAR EL MODELO */
+        this.getSurveys();
+        this.question[0].titleQuestion = '';
+        this.question[0].typeQuestion = '';
       } catch (error) {
         console.log(error)
       }
@@ -356,6 +432,9 @@ export default {
     },
     hideModalSurvey() {
       $('#modalEditSurvey').modal('hide')
+    },
+    hideModalNewQuestion() {
+      $('#addNewQuestion').modal('hide')
     }
   }
 }
