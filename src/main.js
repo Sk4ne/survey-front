@@ -23,8 +23,11 @@ Vue.config.productionTip = false
 // Desarrollo
 axios.defaults.baseURL = 'http://localhost:3000/v1';
 
-// Produccion
+// Produccion RAILWAY
 // axios.defaults.baseURL = 'https://survey-production.up.railway.app/v1';
+
+// Produccion VERCEL
+// axios.defaults.baseURL = 'https://survey-sk4ne.vercel.app/v1';
 
 /* TOOTIP GLOBAL */
 // $(function () {
