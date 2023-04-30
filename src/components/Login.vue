@@ -37,7 +37,7 @@
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title text-monospace" id="exampleModalLabel"><b>Registrarte</b></h5>
+                    <h5 class="modal-title text-monospace" id="exampleModalLabel"><b>Registrarteddd</b></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
@@ -54,8 +54,16 @@
                         <input type="password" class="form-control" placeholder="Contrasena" v-model="newUser.password">
                       </div>
                       <!-- !Mensaje de error -->
-                      <p v-if="errorNewUser" :class="[color]">{{  errorNewUser }}</p>
-
+                      <b-alert
+                        :show="dismissCountDown"
+                        dismissible
+                        variant="danger"
+                        @dismissed="dismissCountDown=0"
+                        @dismiss-count-down="countDownChanged"
+                        v-if="errorNewUser"
+                      >
+                        {{ errorNewUser }} 
+                      </b-alert>
                       <!-- <button type="submit" class="mt-2 btn btn-outline-secondary" @click="hideModalNewUser()"><b>Registrarte</b></button> -->
                       <button type="submit" class="mt-2 btn btn-outline-secondary"><b>Registrarte</b></button>
                     </form>
@@ -161,6 +169,7 @@ export default {
         console.log(error)
         this.errorNewUser = true; 
         this.errorNewUser = error.response.data.errors[0].msg;
+        this.showAlert();
         /* LIMPIAR LOS INPUTS si hay algun error */
         /* this.newUser.email = '';
         this.newUser.name = '';

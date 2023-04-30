@@ -57,7 +57,7 @@ export default {
     return{
       // messageError: false,
       messageError: '',
-      email: 'neider86.test@gmail.com',
+      email: '',
       dismissSecs: 5,
       dismissCountDown: 0,
       isLoading: false
