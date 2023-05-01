@@ -25,20 +25,16 @@
             >
               {{ messageError }} 
             </b-alert>
-            <b-alert
-              :show="dismissCountDown"
-              dismissible
-              variant="danger"
-              @dismissed="dismissCountDown=0"
-              @dismiss-count-down="countDownChanged"
-              v-if="messageErrorPass"
-            >
-              {{ message.failed }} 
-            </b-alert>
-            <!-- <p v-if="messageErrorPass">{{ message.failed }}</p> -->
+            <div v-if="messageErrorPass === true">
+              <b-alert :show="dismissCountDown" dismissible variant="danger" @dismissed="dismissCountDown = 0"
+                @dismiss-count-down="countDownChanged">
+                <ul v-for="(error, key) in arrayErrors" :key="key">
+                  <li>{{ error }}</li>
+                </ul>
+              </b-alert>
+            </div>
             <hr>
             <button type='button' class="mb-4 btn btn-outline-secondary" @click="cancelar()">Cancelar</button>
-            <!-- <button type='submit' class="mb-4 mx-2 btn btn-outline-secondary" @click="showAlert()">Guardar</button> -->
             <button type='submit' class="mb-4 mx-2 btn btn-outline-secondary">Guardar</button>
           </form>
         </div>
@@ -58,7 +54,8 @@ export default {
       changeInput:'password',
       messageError: '',
       // message:{failed:null},
-      message:{failed:''},
+      // message:{failed:''},
+      arrayErrors: [],
       // messageErrorPass:false,
       messageErrorPass: null,
       dismissSecs: 5,
@@ -83,15 +80,24 @@ export default {
         this.showAlert()
         this.$router.push({name:'login'})
       } catch (error) {
-        console.log(error.response.data)
-        this.showAlert()
+        // console.log(error.response.data)
+        // this.showAlert()
         if(error.response.data.msg && error.response.data.errors === undefined){
           this.messageError = error.response.data.msg; 
           this.messageErrorPass = false;
+          this.showAlert()
+          console.log('ERROR 1')
         }
         if (error.response.data.errors!==undefined) {
           this.messageErrorPass = true;
-          this.message.failed = error.response.data.errors
+          let errors  = error.response.data.errors
+          // this.showAlert()
+          // console.log('ERROR 2')
+          this.arrayErrors = errors.map(element => {
+              return element.msg
+          })
+          this.showAlert()
+          // console.log(this.arrayErrors)
         }
       }
     },
