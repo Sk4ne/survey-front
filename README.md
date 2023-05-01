@@ -10,6 +10,11 @@ Este proyecto esta consumiendo una API escrita en `NodeJS` y `TypeScript` que pe
 ## Tecnologias 
 * Vue2
 * Bootstrap
+* Bootstrap-vue
+
+
+##  Demo Producción
+[Survey](https://survey-sk4ne.netlify.app/)
 
 
 ## Project setup
