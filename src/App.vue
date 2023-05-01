@@ -11,13 +11,13 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
               <li class="nav-item">
-                <router-link class="nav-link active" :to="{name:'home'}" v-if="isActive">Home</router-link>
+                <router-link :class="`nav-link ${$route.path === '/home' && 'active'} `" :to="{name:'home'}" v-if="isActive">Home</router-link>
               </li>
               <li class="nav-item ">
-                <router-link class="nav-link" :to="{name:'encuesta'}" v-if="isActive">Surveys</router-link>
+                <router-link :class="`nav-link ${$route.path === '/encuesta' && 'active'}`" :to="{name:'encuesta'}" v-if="isActive">Surveys</router-link>
               </li>
               <li class="nav-item ">
-                <router-link class="nav-link" :to="{name:'login'}" v-if="!isActive">Login</router-link>
+                <router-link :class="`nav-link ${$route.path === '/' && 'active'}`" :to="{name:'login'}" v-if="!isActive">Login</router-link>
               </li>
               <!-- LOGOUT -->
               <li class="nav-item dropdown" v-if="isActive">
@@ -28,10 +28,6 @@
                 <div class="dropdown-menu">
                   <a class="dropdown-item" href="#"> {{  getInfoUser.name }}</a>
                   <a class="dropdown-item" href="#"> {{  getInfoUser.email }}</a>
-                  <!-- <a class="dropdown-item" href="#">
-                    <i class="fa-regular fa-user"></i>
-                    Perfil
-                  </a> -->
                   <router-link :to="{name: 'profile'}" class="dropdown-item">
                     <i class="fa-regular fa-user"></i>
                     Perfil
@@ -51,31 +47,13 @@
     <router-view/>
   </div>
 </template>
-
+<!-- TODO: Buscar una forma de trabajar con la navLink que sea mas limpia -->
 <script>
-/* PINTAR LOS ELEMENTOS DEL MENU */
-/* $(document).ready(function(){
-  console.log('YA CARGO EL DOCUMENTO')
-  $('.nav-link').click(function(){
-    $('.nav-link').removeClass('active');
-    $(this).addClass('active');
-  });
-}); */
-
 import { mapActions,mapGetters } from "vuex";
-import $ from 'jquery'
 export default {
   data(){
     return {
-      
     }
-  },
-  mounted(){
-    /* JQUERY */
-    $('.nav-link').click(function(){
-      $('.nav-link').removeClass('active');
-      $(this).addClass('active');
-    });
   },
   created(){
     this.readToken();
@@ -89,13 +67,9 @@ export default {
 }
 </script>
 <style scoped>
-  .router-link-exact-active:focus {
-    color: #42b983;
+  .active{
     border-bottom: 4px solid #42b983;
   }
-  /* .active{
-    border-bottom: 4px solid #42b983;
-  } */
   .nav-link{
     font-size: 20px;
   }
