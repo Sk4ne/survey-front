@@ -17,11 +17,15 @@
                 v-model="user.password">
               <!-- <i class="fa-regular fa-eye"></i> -->
             </div>
+            <!-- !Mostrar Loading -->
+            <div class="loading text-center" v-if="isLoading">
+              <div class="spinner-border">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
             <!-- !MOSTRAR OCULTAR CONTRASENA -->
             <input type="checkbox" class="mt-3 text-center" @click="changeValueInput()"> Mostrar contrasena
             <!-- !BOTON INICIAR SESION -->
-            <!-- <button type='submit' class="mt-3 btn btn-outline-secondary mb-3 btn-block" @click="showAlert()"
-              variant="info">Iniciar Sesion</button> -->
             <button type='submit' class="mt-3 btn btn-outline-secondary mb-3 btn-block"
               variant="info">Iniciar Sesion
             </button>
@@ -117,17 +121,24 @@ export default {
       /* new USER */
       newUser: {name:'',email:'',password:''},
       errorNewUser: null,
-      color: 'text-danger'
+      color: 'text-danger',
+      /* LOADING */
+      isLoading: false
+
     }
   },
   methods: {
     ...mapActions(['saveUser', 'saveNameUser']),
     async loginUser() {
       try {
+        /* CUANDO ENTRA AQUI MUESTRO EL LOADING */
+        this.isLoading = true;
         const { data } = await this.axios.post(`/user/login`, this.user);
         const token = data.token;
         this.saveUser(token);
 
+        /* Cuando obtengo la data cambio el estado del loading */
+        this.isLoading = false;
         this.$router.push({ name: 'home' })
       } catch (error) {
         console.log('===== Mensaje de error login BEFORE ======');
@@ -187,6 +198,10 @@ export default {
     },
     showAlert() {
       this.dismissCountDown = this.dismissSecs
+    },
+    /* LOADING */
+    loadData(){
+
     }
   },
 }
@@ -197,4 +212,10 @@ export default {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   transition: 0.3s;
 }
+/* .loading{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+} */
 </style>
