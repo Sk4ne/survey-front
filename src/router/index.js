@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import store from '../store'
 
 Vue.use(VueRouter)
 
@@ -9,12 +10,18 @@ const routes = [
     // path: '/',
     path: '/home',
     name: 'home',
-    component: Home
+    component: Home,
+    meta: {
+      requireAuth: true
+    }
   },
   {
     path: '/encuesta',
     name: 'encuesta',
-    component: () => import(/* webpackChunkName: "Encuesta" */ '../views/Encuesta.vue')
+    component: () => import(/* webpackChunkName: "Encuesta" */ '../views/Encuesta.vue'),
+    meta: {
+      requireAuth: true
+    }
   },
   {
     path:'/',
@@ -24,23 +31,27 @@ const routes = [
   {
     path:'/restore-password',
     name: 'restore-password',
-    component: () => import (/* webpackChunkName: 'restorePassword' */'../components/RestorePassword.vue')
+    component: () => import (/* webpackChunkName: 'restorePassword' */'../components/RestorePassword.vue'),
+    meta: {
+      requireAuth: true
+    }
   },
   {
     path:'/password-reset/:id/:token',
     name: 'password-reset',
-    component: () => import (/* webpackChunkName: 'passwordReset' */'../components/newPassword.vue')
+    component: () => import (/* webpackChunkName: 'passwordReset' */'../components/newPassword.vue'),
+    meta: {
+      requireAuth: true
+    }
   },
   {
     path:'/settings/profile',
     name: 'profile',
-    component: () => import (/* webpackChunkName: 'profile' */'../components/Profile.vue')
+    component: () => import (/* webpackChunkName: 'profile' */'../components/Profile.vue'),
+    meta: {
+      requireAuth: true
+    }
   },
-  // {
-  //   path:'/change-password',
-  //   name: 'change-password',
-  //   component: () => import (/* webpackChunkName: 'changePassword' */'../components/ChangePassword.vue')
-  // }
 ]
 
 const router = new VueRouter({
@@ -49,4 +60,12 @@ const router = new VueRouter({
   routes
 })
 
+router.beforeEach((to,from,next) =>{
+  const protectedRoute = to.matched.some(record=>record.meta.requireAuth);
+  if (protectedRoute && store.state.token === '') {
+    next({name:'login'})
+  } else {
+    next();
+  }
+})
 export default router
