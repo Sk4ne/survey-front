@@ -140,8 +140,10 @@
 </template>
 
 <script>
+import { protectRoutes } from "../helpers/readToken";
 import Swal from 'sweetalert2'
 import Instruction from '../components/Instruction.vue';
+import { mapState } from 'vuex';
 export default {
   name: 'Home',
   components: {
@@ -208,9 +210,9 @@ export default {
       }
     }
   },
-  // computed(){
-
-  // },
+  computed:{
+    ...mapState(['token'])
+  },
   methods: {
     submit(ev) {
       if (ev.key == 'Enter') {
@@ -247,14 +249,12 @@ export default {
     },
     async saveSurvey() {
       try {
-        
-       
         const surveys = await this.axios.post('/survey', {
           /* TituloEncuesta, descripcionEncuesta */
           ...this.survey,
           /* ARREGLO DE PREGUNTAS */
           question: this.newQuestions 
-        })
+        },protectRoutes(this.token))
         this.surveys.unshift(surveys.data);
         console.log('DATA SAVED')
         // console.log(this.surveys)
