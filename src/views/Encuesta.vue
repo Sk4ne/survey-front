@@ -114,7 +114,7 @@
               <!-- </MODAL EDITAR | RESPONDER UNA PREGUNTA -->
               <!-- !</RESPONDER UN PREGUNTA - BETTER COMMENTS -->
 
-              <!-- MODAL EDIT SURVEY -->
+              <!-- !MODAL EDIT SURVEY -->
               <div class="modal fade" id="modalEditSurvey" tabindex="-1" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
@@ -139,7 +139,7 @@
                   </div>
                 </div>
               </div>
-              <!-- </MODAL EDIT SURVEY -->
+              <!--! </MODAL EDIT SURVEY -->
 
               <!-- !MODAL AGREGAR UNA PREGUNTA -->
                <!-- Modal -->
@@ -157,12 +157,44 @@
                           <div class="form-group">
                             <input type="text" class="form-control" placeholder="Titulo Pregunta" v-model="question[0].titleQuestion">
                             <select class="mt-2 form-control" v-model="question[0].typeQuestion">
-                              <option value="" disabled >Choose..</option>
+                              <!-- <option value="" disabled >Choose..</option>
                               <option value="QUESTION_OPEN">QUESTION_OPEN</option>
-                              <option value="QUESTION_MULTIPLE">QUESTION_MULTIPLE</option>
+                              <option value="QUESTION_MULTIPLE">QUESTION_MULTIPLE</option> -->
+                              <option :value="typeQuestionEnum.CHOOSE" disabled >Choose..</option>
+                              <option :value="typeQuestionEnum.QUESTION_OPEN">QUESTION_OPEN</option>
+                              <option :value="typeQuestionEnum.QUESTION_MULTIPLE">QUESTION_MULTIPLE</option>
                             </select>
                           </div>
-                          <button type="submit" class="btn btn-outline-secondary" @click="hideModalNewQuestion">Guardar</button>
+                          <!--! Mensaje de error que viene del backend -->
+                          <b-alert
+                            :show="dismissCountDown"
+                            dismissible
+                            variant="danger"
+                            @dismissed="dismissCountDown=0"
+                            @dismiss-count-down="countDownChanged"
+                            v-if="errorCreateQuestion"
+                          >
+                            <p>{{ errorCreateQuestion }}</p>
+                          </b-alert>
+                          <!--! </Mensaje de error que viene del backend -->
+                          
+                          <!--! Error titleQuestion vacion -->
+                          <div v-if="errorA === true">
+                            <b-alert 
+                              :show="dismissCountDown" 
+                              dismissible variant="danger" 
+                              @dismissed="dismissCountDown = 0"
+                              @dismiss-count-down="countDownChanged">
+
+                              <ul v-for="(error, key) in fieldsEmpty" :key="key">
+                              <li>{{ error }}</li>
+                              </ul>
+
+                            </b-alert>
+                          </div>
+                          <!--! </Error titleQuestion vacion -->
+
+                          <button type="submit" class="btn btn-outline-secondary">Guardar</button>
                           <button type="button" class="mx-2 btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
                         </form>
                       </div>
@@ -206,12 +238,16 @@
   </div>
 </template>
 <script>
+import { protectRoutes } from "../helpers/readToken";
 import Swal from 'sweetalert2'
 import $ from 'jquery'
 /* eslint-disable */
 import dayjs from 'dayjs'
 import 'dayjs/locale/es'
 dayjs.locale("es");
+
+import { mapState } from 'vuex';
+import store from '@/store';
 export default {
   name: 'Encuesta',
   data() {
@@ -252,15 +288,39 @@ export default {
           // _id:''
         }
       ],
-      surveyById: {}
+      surveyById: {},
+      /* TIPOS DE PREGUNTA */
+      typeQuestionEnum:{
+        CHOOSE: 'CHOOSE',
+        QUESTION_OPEN: 'QUESTION_OPEN',
+        QUESTION_MULTIPLE: 'QUESTION_MULTIPLE',
+      },
+      /* error backend */
+      errorCreateQuestion:false,
+      /* ALERTAS */
+      /* Error Fields Empty */
+      errorA: null,
+      fieldsEmpty:[],
+      dismissSecs: 5,
+      dismissCountDown: 0,
+      showDismissibleAlert: false
     }
+  },
+  computed: {
+    ...mapState(['token'])
   },
   created() {
     this.getSurveys()
   },
   methods: {
     async getSurveys() {
-      const survey = await this.axios.get('/surveys');
+      // let configToken = {
+      //   headers:{
+      //     'x-token': this.token 
+      //   } 
+      // }
+      /* LEER EL HEADER OPCION 2 */
+      const survey = await this.axios.get('/surveys',protectRoutes(this.token));
       this.allSurveys = survey.data;
     },
     formatDate(date) {
@@ -269,7 +329,7 @@ export default {
     },
     async editSurvey(idSurvey) {
       try {
-        let { data } = await this.axios.get(`/survey/${idSurvey}`);
+        let { data } = await this.axios.get(`/survey/${idSurvey}`,protectRoutes(this.token));
         let { _id } = data;
         this.surveySelectById = _id;
         this.surveyEdit = {
@@ -283,22 +343,29 @@ export default {
     },
     async updateSurvey(survey) {
       try {
-        // await this.axios.put(`/survey/${this.surveySelectById}`,{data: this.surveyEdit})
-        let data = await this.axios.put(`/survey/${survey._id}`, survey)
+        let { data } = await this.axios.put(`/survey/${survey._id}`,survey,protectRoutes(this.token))
         this.getSurveys();
-        // console.log(data)
+        console.log(data)
+        /* ALERTA TODO SALIO PERFECTO */
+        Swal.fire({
+          position: 'top-end',
+          icon: 'success',
+          title: `${data.msg}`,
+          showConfirmButton: false,
+          timer: 1500
+        })
       } catch (error) {
         console.log(error)
       }
     },
-    /* CREAR NUEVA PREGUNTA */
+    /* CREAR NUEVA PREGUNTA - se dispara cuando pulso el boton crear nueva pregunta (+) */
     async idForNewQuestion(idSurvey){
       try {
-        const { data }  = await this.axios.get(`/survey/${idSurvey}`);
+        const { data }  = await this.axios.get(`/survey/${idSurvey}`,protectRoutes(this.token));
         this.surveyById = {
           _id: data._id
         }
-        console.log(idSurvey)
+        // console.log(idSurvey)
       } catch (error) {
         console.log(error.response.data.errors)
       }
@@ -306,18 +373,58 @@ export default {
     /* AGREGAR NUEVA PREGUNTA */
     async addNewQuestion(survey){
       try {
-        const newQuestion = await this.axios.put(`/push-question/${this.surveyById._id}`, {question: this.question});
-        console.log(newQuestion)
+        const newQuestion = await this.axios.put(`/push-question/${this.surveyById._id}`, {question: this.question}, protectRoutes(this.token));
+        // console.log(newQuestion)
+        // console.log('============ERROR A==================')
+        // console.log(this.errorA)
         /* LIMPIAR EL MODELO */
         this.getSurveys();
         this.question[0].titleQuestion = '';
         this.question[0].typeQuestion = '';
+
+        /* Si todo va bien oculto el modal de agregar pregunta */
+        this.hideModalNewQuestion()
+        /* ALERTA TODO SALIO PERFECTO */
+        Swal.fire({
+          position: 'top-end',
+          icon: 'success',
+          title: 'Pregunta creada exitosamente!!',
+          showConfirmButton: false,
+          timer: 1500
+        })
       } catch (error) {
-        console.log(error)
+        // console.log(error)
+        // console.log('=========================')
+        
+        /* ERROR TIPO PREGUNTA  */
+        if(error.response.data.errors === undefined){
+          this.errorA = null; 
+          this.errorCreateQuestion = true;
+          this.errorCreateQuestion = error.response.data.msg 
+  
+          /* METODO QUE MUESTRA LA ALERTA DE BOOTSTRAP - VUE */
+          this.showAlert()
+          /* LIMPIAR EL INPUT donde se ingresa el titulo de la pregunta */
+          // this.question[0].titleQuestion = null;
+        }else{
+          /* ERROR TITULO PREGUNTA VACIO */
+          this.errorA = true; 
+          let errors = error.response.data.errors;
+          this.fieldsEmpty = errors.map(element => {
+            return element.msg
+          })
+          this.showAlert()
+          
+          // console.log(this.errorA)
+          /* LIMPIAR EL SELECT typeQuestion */
+          // this.question[0].typeQuestion = null;
+        }
+        
       }
     },
     async deleteSurvey(idSurvey) {
       try {
+        
         Swal.fire({
           title: 'Esta seguro?',
           text: "Esta accion no se podra revertir!",
@@ -328,7 +435,7 @@ export default {
           confirmButtonText: 'Si, eliminar!'
         }).then(async (result) => {
           if (result.isConfirmed) {
-            await this.axios.delete(`/survey/${idSurvey}`)
+            await this.axios.delete(`/survey/${idSurvey}`,protectRoutes(this.token))
             /* update data */
             this.getSurveys();
             console.log('Survey delete succesfully');
@@ -348,7 +455,7 @@ export default {
     /* ACTIVATE QUESTION */
     async activateQuestion(surveyID, questionID) {
       try {
-        const { data } = await this.axios.get(`/survey/${surveyID}/${questionID}`);
+        const { data } = await this.axios.get(`/survey/${surveyID}/${questionID}`,protectRoutes(this.token));
         const { surveyQuestion } = data;
         /* VALIDAMOS EL TIPO DE PREGUNTA Y MODIFICAMOS EL ARREGLO answerQuestion */
         if (data.typeQuestion === 'QUESTION_OPEN') {
@@ -383,15 +490,32 @@ export default {
       try {
         /* VALIDO EL TIPO DE PREGUNTA */
         if (this.typeQuestion == 'QUESTION_OPEN') {
-          await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`, { answerOpen: this.answerQuestion.answerO, titleQuestion: this.answerQuestion.titleQuestion});
+          const {data } = await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`, { answerOpen: this.answerQuestion.answerO, titleQuestion: this.answerQuestion.titleQuestion},protectRoutes(this.token));
           /* LLAMO EL METODO QUE ME RETORNA TODAS LAS ENCUESTAS - PARA ACTUALIZAR ESTA VISTA */
           this.getSurveys();
-          // console.log(this.typeQuestion)
-          // console.log(this.answerQuestion)
+
+          /* ALERTA DE QUE TODO SALIO BIEN */
+          /* ALERTA TODO SALIO PERFECTO */
+          Swal.fire({
+            position: 'top-end',
+            icon: 'success',
+            title: `${data.message}`,
+            showConfirmButton: false,
+            timer: 1500
+          })
         } else {
           // alert('SOY UNA PREGUNTA MULTIPLE - AHORA TRABAJARE CONTIGO');
-          await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`,{answerMultiple: this.selectedOption, titleQuestion: this.answerQuestion.titleQuestion})
+          const { data } = await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`,{answerMultiple: this.selectedOption, titleQuestion: this.answerQuestion.titleQuestion},protectRoutes(this.token))
           this.getSurveys();
+          /* ALERTA TODO SALIO PERFECTO */
+          console.log(data)
+          Swal.fire({
+            position: 'top-end',
+            icon: 'success',
+            title: `${data.message}`,
+            showConfirmButton: false,
+            timer: 1500
+          })
         }
       } catch (error) {
         console.log(error)
@@ -411,7 +535,7 @@ export default {
           confirmButtonText: 'Si, eliminar!'
         }).then(async (result) => {
           if (result.isConfirmed) {
-            let removeQuestion = await this.axios.delete(`/survey/${idSurvey}/${idQuestion}`)
+            let removeQuestion = await this.axios.delete(`/survey/${idSurvey}/${idQuestion}`,protectRoutes(this.token))
             /* update data */
             this.getSurveys();
             console.log(removeQuestion)
@@ -435,6 +559,13 @@ export default {
     },
     hideModalNewQuestion() {
       $('#addNewQuestion').modal('hide')
+    },
+    /* ALERTS */
+    countDownChanged(dismissCountDown) {
+        this.dismissCountDown = dismissCountDown
+    },
+    showAlert() {
+      this.dismissCountDown = this.dismissSecs
     }
   }
 }
