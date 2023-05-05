@@ -19,10 +19,10 @@ Vue.use(BootstrapVue)
 Vue.config.productionTip = false
 
 // Desarrollo
-// axios.defaults.baseURL = 'http://localhost:3000/v1';
+axios.defaults.baseURL = 'http://localhost:3000/v1';
 
 // Produccion VERCEL
-axios.defaults.baseURL = 'https://survey-sk4ne.vercel.app/v1';
+// axios.defaults.baseURL = 'https://survey-sk4ne.vercel.app/v1';
 
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()

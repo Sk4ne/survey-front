@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+/* eslint-disable */
 import store from '../store'
 
 Vue.use(VueRouter)
@@ -61,8 +62,10 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to,from,next) =>{
+  let loggedIn = localStorage.getItem('token')
   const protectedRoute = to.matched.some(record=>record.meta.requireAuth);
-  if (protectedRoute && store.state.token === '') {
+  // if (protectedRoute && store.state.token === '') {
+  if (protectedRoute && !loggedIn) {
     next({name:'login'})
   } else {
     next();
