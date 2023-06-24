@@ -53,10 +53,7 @@ export default {
       password: null,
       changeInput:'password',
       messageError: '',
-      // message:{failed:null},
-      // message:{failed:''},
       arrayErrors: [],
-      // messageErrorPass:false,
       messageErrorPass: null,
       dismissSecs: 5,
       dismissCountDown: 0,
@@ -80,7 +77,6 @@ export default {
         this.showAlert()
         this.$router.push({name:'login'})
       } catch (error) {
-        // console.log(error.response.data)
         // this.showAlert()
         if(error.response.data.msg && error.response.data.errors === undefined){
           this.messageError = error.response.data.msg; 
@@ -91,8 +87,6 @@ export default {
         if (error.response.data.errors!==undefined) {
           this.messageErrorPass = true;
           let errors  = error.response.data.errors
-          // this.showAlert()
-          // console.log('ERROR 2')
           this.arrayErrors = errors.map(element => {
               return element.msg
           })
