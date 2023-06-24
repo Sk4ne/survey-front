@@ -9,33 +9,42 @@
         <div class="mt-4 col-md-4 login-card">
           <form class="mt-4" @submit.prevent="loginUser()">
             <div class="form-group">
-              <input type="email" name="" id="" class="form-control" placeholder="INGRESE SU CORREO ELECTRONICO"
+              <input type="email" class="form-control" placeholder="INGRESE SU CORREO ELECTRONICO"
                 v-model="user.email">
             </div>
             <div class="form-group">
-              <input :type='changeInput' name="" id="" class="form-control" placeholder="INGRESE SU CONTRASENA"
+              <input :type='changeInput' class="form-control" placeholder="INGRESE SU CONTRASENA"
                 v-model="user.password">
-              <!-- <i class="fa-regular fa-eye"></i> -->
             </div>
-            <!-- !Mostrar Loading -->
+            <!-- ?Mostrar Loading -->
             <div class="loading text-center" v-if="isLoading">
               <div class="spinner-border">
                 <span class="sr-only">Loading...</span>
               </div>
             </div>
-            <!-- !MOSTRAR OCULTAR CONTRASENA -->
+            <!-- ?MOSTRAR OCULTAR CONTRASENA -->
             <input type="checkbox" class="mt-3 text-center" @click="changeValueInput()"> Mostrar contrasena
-            <!-- !BOTON INICIAR SESION -->
+            <!-- ?BOTON INICIAR SESION -->
             <button type='submit' class="mt-3 btn btn-outline-secondary mb-3 btn-block"
               variant="info">Iniciar Sesion
             </button>
-
-            <!-- !OLVIDASTE LA CONTRASENA? -->
-            <p class="mt-2 forgot-password text-right">
-              <router-link :to="{ name: 'restore-password' }">Olvidaste la contraseña? </router-link>
+            <!-- ?LOGIN WITH FACEBOOK -->
+            <button type='button' class="btn btn-primary btn-block" @click="loginWithFacebook()">
+              <i class="fa-brands fa-facebook"></i>
+              Sign In With Facebook
+            </button>
+            <hr>
+            <!-- ?LOGIN WITH GOOGLE -->
+            <button class="btn btn-danger btn-block">
+              <i class="fa-brands fa-google"></i>
+              Sign In With Google 
+            </button>
+            <!-- ?OLVIDASTE LA CONTRASENA? -->
+            <p class="mt-4 forgot-password text-right">
+              <router-link :to="{ name: 'restore-password' }">Olvidaste la contraseña? </router-link><br>
             </p>
             <hr>
-            <!-- !MODAL NUEVO USUARIO -->
+            <!-- ?MODAL NUEVO USUARIO -->
             <div class="modal fade" id="modalNewUser" tabindex="-1" aria-labelledby="exampleModalLabel"
               aria-hidden="true">
               <div class="modal-dialog">
@@ -57,7 +66,7 @@
                       <div class="form-group">
                         <input type="password" class="form-control" placeholder="Contrasena" v-model="newUser.password">
                       </div>
-                      <!-- !Mensaje de error -->
+                      <!-- ?Mensaje de error -->
                       <b-alert
                         :show="dismissCountDown"
                         dismissible
@@ -68,20 +77,16 @@
                       >
                         {{ errorNewUser }} 
                       </b-alert>
-                      <!-- <button type="submit" class="mt-2 btn btn-outline-secondary" @click="hideModalNewUser()"><b>Registrarte</b></button> -->
                       <button type="submit" class="mt-2 btn btn-outline-secondary"><b>Registrarte</b></button>
                     </form>
                   </div>
                 </div>
               </div>
             </div>
-            <!-- !REGISTRARSE - CREAR CUENTA-->
+            <!-- ?REGISTRARSE - CREAR CUENTA-->
             <button type='button' class="mb-4 btn btn-outline-secondary btn-block" data-toggle="modal"
               data-target="#modalNewUser">Registrarse</button>
-            <!-- <button type='button' class="mb-4 btn btn-outline-secondary btn-block" @click="newUser()" data-toggle="modal"
-              data-target="#modalNewUser">Registrarse</button> -->
-
-            <!-- !MENSAJE DE ERROR LOGIN -->
+            <!-- ?MENSAJE DE ERROR LOGIN -->
             <b-alert
               :show="dismissCountDown"
               dismissible
@@ -99,15 +104,13 @@
 </template>
 
 <script>
-// import NewUser from './NewUser.vue'
-import { mapActions } from "vuex";
+import { mapActions } from "vuex";  
 import Swal from "sweetalert2";
 import $ from 'jquery'
 
 export default {
   name: 'Login',
   components: {
-    // NewUser
   },
   data() {
     return {
@@ -123,7 +126,8 @@ export default {
       errorNewUser: null,
       color: 'text-danger',
       /* LOADING */
-      isLoading: false
+      isLoading: false,
+      dataUserFacebook: []
 
     }
   },
@@ -131,24 +135,32 @@ export default {
     ...mapActions(['saveUser', 'saveNameUser']),
     async loginUser() {
       try {
-        /* CUANDO ENTRA AQUI MUESTRO EL LOADING */
+        // En este punto mostrarmos el isLoading
         this.isLoading = true;
         const { data } = await this.axios.post(`/user/login`, this.user);
         const token = data.token;
+        // Almacenamos el token en el localStorage
         this.saveUser(token);
 
         /* Cuando obtengo la data cambio el estado del loading */
         this.isLoading = false;
         this.$router.push({ name: 'home' })
       } catch (error) {
-        console.log('===== Mensaje de error login BEFORE ======');
-        console.log(this.errorLogin)
         this.errorLogin = true;
         this.messageError = error.response.data.msg;
         this.showAlert()
-        console.log('=======ERROR LOGIN AFTER========');
-        console.log(this.errorLogin);
+        // isLoading false para que no se siga ejecutando el isLoading
+        this.isLoading = false;
       }
+    },
+    async loginWithFacebook(){
+      try {
+        const data = await this.axios.get('http://localhost:3000/v1/auth/facebook')
+        window.location.href = data.request.responseURL;
+      } catch (error) {
+        console.log(error)
+      }
+      
     },
     /* OCULTAR MOSTRAR CONTRASENA */
     changeValueInput() {
@@ -181,11 +193,6 @@ export default {
         this.errorNewUser = true; 
         this.errorNewUser = error.response.data.errors[0].msg;
         this.showAlert();
-        /* LIMPIAR LOS INPUTS si hay algun error */
-        /* this.newUser.email = '';
-        this.newUser.name = '';
-        this.newUser.password = ''; */
-        // this.hideModalNewUser()
       }
     },
     /* OCULTAR MODAL */
@@ -199,10 +206,6 @@ export default {
     showAlert() {
       this.dismissCountDown = this.dismissSecs
     },
-    /* LOADING */
-    loadData(){
-
-    }
   },
 }
 </script>
