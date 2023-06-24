@@ -8,6 +8,7 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 // import 'boostrap/dist/js/bootstrap.min.js';
+
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import $ from 'jquery'
