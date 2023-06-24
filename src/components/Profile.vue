@@ -131,11 +131,6 @@ export default {
       try {
         /* eslint-disable */
         const { data } = await this.axios.put(`/user/${this.getInfoUser._id}`,this.user)
-        // console.log(data)
-        /* estratagema */
-        /* console.log(this.user)
-        console.log('\n' + '=========================');
-        console.log(this.getInfoUser.name) */
         Swal.fire({
           position: 'top-end',
           icon: 'success',
@@ -159,4 +154,13 @@ export default {
  .update-password{
   text-decoration: none; color: inherit;
  }
+
+
+ @media (max-width: 576px) {
+      .fixed-bottom {
+        position: static;
+        width: 30%;
+        height: auto;
+      }
+    }
 </style>
