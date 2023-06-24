@@ -1,18 +1,16 @@
 <template>
   <div class="encuesta">
     <div class="container-fluid">
-      <!-- COL ORIGINAL offset-md-2 col-md-8 -->
       <div class="row">
         <div class="mt-4 offset-md-2 col-md-8">
           <h1 class="text-center">Listado de encuestas</h1>
-          <!-- <div class="mb-4 mt-2 card" v-for="(survey,key) of allSurveys" :key="key"> ORIGINAL -->
           <div class="mb-4 mt-2 card" v-for="(survey, key) of allSurveys" :key="key">
             <div class="mt-4 card-body">
               <h2 class="text-center">{{ survey.titleSurvey }} </h2>
-              <p class="text-warning">{{ formatDate(survey.createAt) }}</p>
+              <p class="text-warning">{{ formatDate(survey.createAt) }} - {{ survey.user.name }}</p>
 
               <p class="mt-4">{{ survey.description }}</p>
-              <!-- LISTADO DE PREGUNTAS CON SUS RESPUESTAS -->
+              <!--? LISTADO DE PREGUNTAS CON SUS RESPUESTAS -->
               <div >
                 <ul>
                   <div v-for="(question, key) of survey.question" :key="key">
@@ -26,20 +24,19 @@
                       <p>{{ question.answerM.answer }}</p>
                     </div>
                     
-                    <!-- !BOTON EDITAR PREGUNTA -->
+                    <!-- ?BOTON EDITAR PREGUNTA -->
                     <i class="mt-2 mx-2 btn btn-outline-secondary fa-regular fa-pen-to-square " data-toggle="modal"
                       data-target="#exampleModal" @click="activateQuestion(survey._id, question._id)">
                     </i>
-                    <!-- !BOTON ELIMINAR PREGUNTA -->
+                    <!-- ?BOTON ELIMINAR PREGUNTA -->
                     <i class="mt-2 fa-regular fa-trash-can btn btn-outline-secondary"
                       @click="deleteQuestion(survey._id, question._id)">
                     </i>
                   </div>
                 </ul>
               </div>
-              <!-- </LISTADO DE PREGUNTAS CON SUS RESPUESTAS -->
+              <!--? </LISTADO DE PREGUNTAS CON SUS RESPUESTAS -->
 
-              <!-- ====================================================================== -->
               <!-- MODAL EDITAR | RESPONDER UNA PREGUNTA -->
               <!-- !RESPONDER UN PREGUNTA - BETTER COMMENTS -->
               <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -55,7 +52,6 @@
                     <div class="modal-body" v-if="typeQuestion === 'QUESTION_OPEN'">
                       <form @submit.prevent="updateAnswer()">
                         <div class="form-group">
-                          <!-- <p class="text-center font-weight-bold">{{ answerQuestion.titleQuestion }}</p> -->
                           <input type="text" class="form-control" v-model="answerQuestion.titleQuestion">
                           <textarea rows="5" class="mt-2 form-control" v-model="answerQuestion.answerO"></textarea>
                         </div>
@@ -70,9 +66,7 @@
                       </form>
                     </div>
                     <!-- MUESTRO ESTE MODAL-BODY si la pregunta es QUESTION_MULTIPLE -->
-                    <!-- !MUESTRO ESTE MODAL-BODY si la pregunta es QUESTION_MULTIPLE -->
                     <div class="modal-body" v-else>
-                      <!-- <p class="text-center font-weight-bold">{{ answerQuestion.titleQuestion }}</p> -->
                       <input type="text" class="mb-2 form-control" v-model="answerQuestion.titleQuestion">
                       <form @submit.prevent="updateAnswer()">
                         <div class="form-check">
@@ -107,14 +101,12 @@
                       </form>
                     </div>
                     <!-- </MUESTRO ESTE MODAL-BODY si la pregunta es QUESTION_MULTIPLE -->
-                    <!-- !</MUESTRO ESTE MODAL-BODY si la pregunta es QUESTION_MULTIPLE -->
                   </div>
                 </div>
               </div>
               <!-- </MODAL EDITAR | RESPONDER UNA PREGUNTA -->
-              <!-- !</RESPONDER UN PREGUNTA - BETTER COMMENTS -->
 
-              <!-- !MODAL EDIT SURVEY -->
+              <!-- MODAL EDIT SURVEY -->
               <div class="modal fade" id="modalEditSurvey" tabindex="-1" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
@@ -139,7 +131,7 @@
                   </div>
                 </div>
               </div>
-              <!--! </MODAL EDIT SURVEY -->
+              <!-- </MODAL EDIT SURVEY -->
 
               <!-- !MODAL AGREGAR UNA PREGUNTA -->
                <!-- Modal -->
@@ -202,6 +194,7 @@
                   </div>
                 </div>
               <!-- !</MODAL AGREGAR UNA PREGUNTA -->
+
               <!-- MENSAJE DE ERROR BACKEND -->
               <p class="text-center text-white bg-danger p-2" v-if="errorMessage">{{ errorMessage }}</p>
             </div>
@@ -228,11 +221,6 @@
             </div>
           </div>
         </div>
-        <!-- * SECOND column -->
-        <!-- <div class="col-md">
-          <button class="mt-4 btn btn-outline-secondary">+</button>
-        </div> -->
-        <!-- * </SECOND column -->
       </div>
     </div>
   </div>
@@ -365,7 +353,6 @@ export default {
         this.surveyById = {
           _id: data._id
         }
-        // console.log(idSurvey)
       } catch (error) {
         console.log(error.response.data.errors)
       }
@@ -373,10 +360,7 @@ export default {
     /* AGREGAR NUEVA PREGUNTA */
     async addNewQuestion(survey){
       try {
-        const newQuestion = await this.axios.put(`/push-question/${this.surveyById._id}`, {question: this.question}, protectRoutes(this.token));
-        // console.log(newQuestion)
-        // console.log('============ERROR A==================')
-        // console.log(this.errorA)
+        await this.axios.put(`/push-question/${this.surveyById._id}`, {question: this.question}, protectRoutes(this.token));
         /* LIMPIAR EL MODELO */
         this.getSurveys();
         this.question[0].titleQuestion = '';
@@ -393,19 +377,14 @@ export default {
           timer: 1500
         })
       } catch (error) {
-        // console.log(error)
-        // console.log('=========================')
-        
         /* ERROR TIPO PREGUNTA  */
         if(error.response.data.errors === undefined){
           this.errorA = null; 
           this.errorCreateQuestion = true;
           this.errorCreateQuestion = error.response.data.msg 
   
-          /* METODO QUE MUESTRA LA ALERTA DE BOOTSTRAP - VUE */
+          /* metodo que muestra la alerta de bootstrap - vue */
           this.showAlert()
-          /* LIMPIAR EL INPUT donde se ingresa el titulo de la pregunta */
-          // this.question[0].titleQuestion = null;
         }else{
           /* ERROR TITULO PREGUNTA VACIO */
           this.errorA = true; 
@@ -414,10 +393,6 @@ export default {
             return element.msg
           })
           this.showAlert()
-          
-          // console.log(this.errorA)
-          /* LIMPIAR EL SELECT typeQuestion */
-          // this.question[0].typeQuestion = null;
         }
         
       }
@@ -436,9 +411,8 @@ export default {
         }).then(async (result) => {
           if (result.isConfirmed) {
             await this.axios.delete(`/survey/${idSurvey}`,protectRoutes(this.token))
-            /* update data */
+            /* Regresar la data actualizada */
             this.getSurveys();
-            console.log('Survey delete succesfully');
             Swal.fire(
               'Eliminada!',
               'Encuesta eliminada.',
@@ -465,7 +439,6 @@ export default {
             id: surveyID,
             idQuestion: questionID
           }
-          // console.log(this.surveySelected);
         } else {
           this.answerQuestion = surveyQuestion;
           this.typeQuestion = this.answerQuestion.typeQuestion;
@@ -491,7 +464,7 @@ export default {
         /* VALIDO EL TIPO DE PREGUNTA */
         if (this.typeQuestion == 'QUESTION_OPEN') {
           const {data } = await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`, { answerOpen: this.answerQuestion.answerO, titleQuestion: this.answerQuestion.titleQuestion},protectRoutes(this.token));
-          /* LLAMO EL METODO QUE ME RETORNA TODAS LAS ENCUESTAS - PARA ACTUALIZAR ESTA VISTA */
+          // Retornar la data actualizada
           this.getSurveys();
 
           /* ALERTA DE QUE TODO SALIO BIEN */
@@ -504,11 +477,11 @@ export default {
             timer: 1500
           })
         } else {
-          // alert('SOY UNA PREGUNTA MULTIPLE - AHORA TRABAJARE CONTIGO');
           const { data } = await this.axios.put(`/sub-question/${this.surveySelected.id}/${this.surveySelected.idQuestion}`,{answerMultiple: this.selectedOption, titleQuestion: this.answerQuestion.titleQuestion},protectRoutes(this.token))
+          // Retornar la data actualizada
           this.getSurveys();
-          /* ALERTA TODO SALIO PERFECTO */
-          console.log(data)
+
+          // ALERTA TODO SALIO PERFECTO
           Swal.fire({
             position: 'top-end',
             icon: 'success',
@@ -524,7 +497,6 @@ export default {
     /* DELETE QUESTION */
     async deleteQuestion(idSurvey, idQuestion) {
       try {
-        /* MENSAJE SWEETALERT DELETE */
         Swal.fire({
           title: 'Esta seguro?',
           text: "Esta accion no se podra revertir",
@@ -536,7 +508,7 @@ export default {
         }).then(async (result) => {
           if (result.isConfirmed) {
             let removeQuestion = await this.axios.delete(`/survey/${idSurvey}/${idQuestion}`,protectRoutes(this.token))
-            /* update data */
+            // Retornar la data actualizada
             this.getSurveys();
             console.log(removeQuestion)
             Swal.fire(
