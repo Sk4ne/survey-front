@@ -33,9 +33,9 @@ const routes = [
     path:'/restore-password',
     name: 'restore-password',
     component: () => import (/* webpackChunkName: 'restorePassword' */'../components/RestorePassword.vue'),
-    meta: {
-      requireAuth: true
-    }
+    // meta: {
+    //   requireAuth: true
+    // }
   },
   {
     path:'/password-reset/:id/:token',
